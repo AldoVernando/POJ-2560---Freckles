@@ -1,0 +1,99 @@
+#include<stdio.h>
+#include<math.h>
+#include<string.h>
+#include<vector>
+#include<algorithm>
+
+using namespace std;
+
+bool checkEdges[100][100] = {};
+int parent[100];
+	
+struct coor{
+	double x;
+	double y;
+	int index;
+};
+
+struct edge{
+	coor src;
+	coor dst;
+	double weight;
+};
+
+vector<coor> coors;
+vector<edge> edges;
+
+bool compare(edge a, edge b)
+{ 
+    return a.weight < b.weight; 
+}
+
+int getParent(int curr){
+	if(parent[curr] != curr)
+		return parent[curr] = getParent(parent[curr]);
+	return parent[curr];
+}
+
+void findEdges(){
+	
+	for(int i=0;i<coors.size();i++){
+		for(int j=0;j<coors.size();j++){
+			if( checkEdges[i][j] == false && i != j ){
+				
+				edge e;
+				e.src = coors[i];
+				e.dst = coors[j];
+				e.weight = sqrt(pow(coors[i].x-coors[j].x,2) + pow(coors[i].y-coors[j].y,2));
+				
+				edges.push_back(e);
+				
+				checkEdges[i][j] = true;
+				checkEdges[j][i] = true;
+			}
+		}		
+	}
+}
+
+int main(){
+	
+	memset(checkEdges,0,sizeof(checkEdges));
+	
+	int coordinates;
+	
+	scanf("%d",&coordinates);
+	
+	for(int i=0;i<coordinates;i++){
+		double x , y;
+		
+		scanf("%lf %lf",&x,&y);
+		
+		coor c;
+		c.x = x;
+		c.y = y;
+		c.index = coors.size();
+		
+		coors.push_back(c);
+	}
+	
+	findEdges();
+	
+	sort(edges.begin(), edges.end(),compare);
+
+		for(int i=0;i<coordinates;i++){
+			parent[i] = i;
+		}
+		
+		double mst = 0;
+	 	
+		for(int i=0;i<edges.size();i++){
+			if(getParent(edges[i].src.index) != getParent(edges[i].dst.index)){
+				parent[getParent(edges[i].src.index)] = getParent(edges[i].dst.index);
+				mst += edges[i].weight;
+			}	
+		}
+		
+		printf("%.2lf\n",mst);
+	
+	return 0;
+}
